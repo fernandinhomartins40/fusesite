@@ -23,6 +23,6 @@ describe("open_creative_studio UI contract", () => {
     const html = readStudioHtml();
     expect(html).toContain('id="root"');
     expect(html).toContain("FUSE Criativos");
-    expect(html).toContain("Abrir demonstração");
+    expect(html).toContain("Preparar e gerar no ChatGPT");
   });
 });

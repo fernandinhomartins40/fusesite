@@ -1,29 +1,30 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
+const concepts = [["editorial-premium", "Editorial premium"], ["minimalista-produto", "Minimalista de produto"], ["oferta-varejista-impacto", "Oferta varejista de impacto"], ["encarte-organizado", "Encarte organizado"], ["lifestyle-autentico", "Lifestyle autêntico"], ["estudio-publicitario", "Estúdio publicitário"], ["tipografico-ousado", "Tipográfico ousado"], ["colagem-contemporanea", "Colagem contemporânea"], ["retro-moderno", "Retrô moderno"], ["organico-artesanal", "Orgânico e artesanal"], ["tecnologia-premium", "Tecnologia premium"], ["institucional-humano", "Institucional humano"]] as const;
+const formats = ["Instagram 1080×1350", "Instagram story 1080×1920", "Meta 1200×628", "Banner 1920×1080", "A4 retrato"];
+const steps = ["Campanha", "Conceito", "Marca", "Produtos", "Mensagem", "Formatos", "Revisão"];
+type Product = { name: string; price: string; condition: string };
+type Campaign = { campaignType: string; niche: string; objective: string; conceptId: string; brandName: string; message: string; cta: string; audience: string; formats: string[]; products: Product[]; imageIds: string[] };
+const initial: Campaign = { campaignType: "", niche: "", objective: "", conceptId: "", brandName: "", message: "", cta: "", audience: "", formats: [], products: [{ name: "", price: "", condition: "" }], imageIds: [] };
+function bridge(method: string, params: unknown) { window.parent.postMessage({ jsonrpc: "2.0", id: Date.now(), method, params }, "*"); }
+
 function App() {
-  const [opened, setOpened] = useState(false);
-
-  return (
-    <main className="studio" aria-label="FUSE Criativos">
-      <p className="eyebrow">FUSE / ESTÚDIO CRIATIVO</p>
-      <h1>FUSE Criativos</h1>
-      <p className="summary">
-        Direção de arte profissional para a sua próxima campanha, preparada para gerar no ChatGPT.
-      </p>
-      <button type="button" onClick={() => setOpened(true)}>
-        Abrir demonstração
-      </button>
-      {opened && (
-        <section className="notice" aria-live="polite">
-          <strong>UI renderizada com sucesso.</strong>
-          <span>A próxima fase adicionará o wizard de campanha, arquivos e briefing.</span>
-        </section>
-      )}
-    </main>
-  );
+  const [step, setStep] = useState(0); const [data, setData] = useState<Campaign>(initial); const [notice, setNotice] = useState("");
+  const update = (key: keyof Campaign, value: Campaign[keyof Campaign]) => setData((current) => ({ ...current, [key]: value }));
+  const issues = useMemo(() => [!data.campaignType && "tipo de campanha", !data.niche && "nicho", !data.objective && "objetivo", !data.conceptId && "conceito", !data.brandName && "marca", !data.message && "mensagem", !data.formats.length && "formato", !data.products.some((p) => p.name) && "produto"].filter(Boolean), [data]);
+  const brief = `Crie UMA peça para ${data.formats[0] || "o formato selecionado"}. Objetivo: ${data.objective}. Nicho: ${data.niche}. Conceito: ${concepts.find(([id]) => id === data.conceptId)?.[1] || data.conceptId}. Marca: ${data.brandName}. Mensagem: ${data.message}. CTA: ${data.cta || "não informado"}. Produtos: ${data.products.filter((p) => p.name).map((p) => `${p.name}${p.price ? ` — ${p.price}` : ""}`).join("; ")}. Preserve logo, embalagens, preços e referências; não invente informações. Priorize legibilidade, contraste e área segura.`;
+  const next = () => { if (step < steps.length - 1) { setStep(step + 1); bridge("ui/update-model-context", { content: [{ type: "text", text: JSON.stringify(data) }] }); } };
+  const send = () => { if (issues.length) { setNotice(`Faltam: ${issues.join(", ")}.`); return; } bridge("ui/message", { role: "user", content: [{ type: "text", text: `Prepare e gere no ChatGPT.\n\n${brief}` }] }); setNotice("Pedido preparado e enviado ao ChatGPT. A geração acontece na conversa."); };
+  return <main className="studio" aria-label="FUSE Criativos"><header><p className="eyebrow">FUSE / ESTÚDIO CRIATIVO</p><h1>FUSE Criativos</h1><p className="summary">Transforme dados comerciais em direção de arte pronta para gerar no ChatGPT.</p></header><nav aria-label="Etapas">{steps.map((label, index) => <button className={index === step ? "step active" : "step"} onClick={() => setStep(index)} key={label}>{index + 1}. {label}</button>)}</nav><section className="panel">
+    {step === 0 && <><h2>Base da campanha</h2><div className="grid">{([['campaignType','Tipo de campanha','Novidade, promoção, lançamento…'],['niche','Nicho','Ex.: Perfumaria e cosméticos'],['objective','Objetivo','Vender, captar lead, informar…']] as const).map(([key,label,placeholder]) => <label key={key}>{label}<input value={data[key]} placeholder={placeholder} onChange={(e) => update(key,e.target.value)} /></label>)}</div></>}
+    {step === 1 && <><h2>Escolha um conceito</h2><div className="cards">{concepts.map(([id,name]) => <button className={data.conceptId === id ? "concept selected" : "concept"} key={id} onClick={() => update("conceptId",id)}><span>{name}</span></button>)}</div></>}
+    {step === 2 && <><h2>Marca e materiais</h2><div className="grid"><label>Nome da marca<input value={data.brandName} onChange={(e) => update("brandName",e.target.value)} /></label><label>Logo e referências<input type="file" multiple accept="image/png,image/jpeg,image/webp,image/svg+xml,application/pdf" onChange={(e) => { const names = Array.from(e.target.files ?? []).map((f) => f.name); update("imageIds", names); setNotice(names.length ? "Arquivos selecionados localmente. No ChatGPT, o host fornecerá IDs válidos de upload." : ""); }} /></label></div><p className="hint">Uploads dependem da capacidade do host; esta etapa não afirma que um arquivo foi enviado quando isso não ocorreu.</p></>}
+    {step === 3 && <><h2>Produtos e preços</h2>{data.products.map((product,index) => <div className="product" key={index}><input aria-label="Nome do produto" placeholder="Produto ou serviço" value={product.name} onChange={(e) => update("products",data.products.map((p,i) => i === index ? {...p,name:e.target.value}:p))}/><input aria-label="Preço" placeholder="Preço atual" value={product.price} onChange={(e) => update("products",data.products.map((p,i) => i === index ? {...p,price:e.target.value}:p))}/><input aria-label="Condição" placeholder="Condição" value={product.condition} onChange={(e) => update("products",data.products.map((p,i) => i === index ? {...p,condition:e.target.value}:p))}/></div>)}<button className="secondary" onClick={() => update("products",[...data.products,{name:"",price:"",condition:""}])}>+ Adicionar produto</button></>}
+    {step === 4 && <><h2>Mensagem</h2><div className="grid"><label>Mensagem principal<textarea maxLength={180} value={data.message} onChange={(e) => update("message",e.target.value)} /></label><label>Chamada para ação<input value={data.cta} onChange={(e) => update("cta",e.target.value)} /></label><label>Público<input value={data.audience} onChange={(e) => update("audience",e.target.value)} /></label></div></>}
+    {step === 5 && <><h2>Formatos</h2><div className="formats">{formats.map((format) => <label key={format}><input type="checkbox" checked={data.formats.includes(format)} onChange={() => update("formats",data.formats.includes(format) ? data.formats.filter((item) => item !== format) : [...data.formats,format])}/>{format}</label>)}</div></>}
+    {step === 6 && <><h2>Revisão</h2>{issues.length ? <p className="warning">Antes de gerar, complete: {issues.join(", ")}.</p> : <p className="success">Dados essenciais completos. A primeira peça será solicitada por vez.</p>}<pre>{brief}</pre></>}
+  </section><footer><button className="secondary" disabled={!step} onClick={() => setStep(step - 1)}>Voltar</button>{step < steps.length - 1 ? <button onClick={next}>Continuar</button> : <button onClick={send}>Preparar e gerar no ChatGPT</button>}</footer>{notice && <p className="notice" aria-live="polite">{notice}</p>}</main>;
 }
-
 createRoot(document.getElementById("root")!).render(<App />);
-
