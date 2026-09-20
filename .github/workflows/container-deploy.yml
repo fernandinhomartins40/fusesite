@@ -12,6 +12,9 @@ concurrency:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DEPLOY_HOST: 72.60.10.108
+  DEPLOY_USER: root
+  VPS_HOST_FINGERPRINT: SHA256:qEkOWNaWFZykVFmF/pMUlWvXYssbO0byQTW4KfcnHPU
 
 jobs:
   test:
@@ -69,29 +72,30 @@ jobs:
     needs: publish
     runs-on: ubuntu-latest
     environment: production
-    permissions: {}
+    permissions:
+      packages: read
     steps:
       - uses: actions/checkout@v6
       - name: Copy the production Compose manifest
         uses: appleboy/scp-action@v1.0.0
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_DEPLOY_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_HOST_FINGERPRINT }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          fingerprint: ${{ env.VPS_HOST_FINGERPRINT }}
           source: compose.production.yaml
           target: /opt/fuse-mcp-platform
       - name: Pull the immutable image and restart only FUSE MCP
         uses: appleboy/ssh-action@v1.2.2
         env:
           FUSE_IMAGE: ${{ needs.publish.outputs.image }}
-          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
-          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          GHCR_USERNAME: ${{ github.actor }}
+          GHCR_PULL_TOKEN: ${{ github.token }}
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_DEPLOY_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_HOST_FINGERPRINT }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          fingerprint: ${{ env.VPS_HOST_FINGERPRINT }}
           envs: FUSE_IMAGE,GHCR_USERNAME,GHCR_PULL_TOKEN
           script: |
             set -eu
