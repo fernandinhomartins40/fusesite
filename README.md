@@ -15,3 +15,6 @@ O endpoint MCP local será `http://localhost:3000/criativos/mcp` e o health chec
 
 O teste visual no ChatGPT só deve ser feito depois de expor o endpoint por HTTPS; nenhum deploy ou alteração de VPS faz parte desta etapa.
 
+## Produção
+
+O build de produção e o deploy são feitos pelo GitHub Actions via GHCR; veja [o guia de deploy](docs/deployment/github-actions.md). A VPS só recebe uma imagem já construída e identificada pelo SHA do commit.

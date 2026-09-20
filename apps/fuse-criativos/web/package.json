@@ -7,15 +7,13 @@
     "build": "vite build",
     "check": "tsc --noEmit -p tsconfig.json"
   },
-  "dependencies": {
+  "devDependencies": {
     "@modelcontextprotocol/ext-apps": "^2.0.0",
     "@vitejs/plugin-react": "^5.0.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "vite": "^7.1.7",
-    "zod": "^4.2.0"
-  },
-  "devDependencies": {
+    "zod": "^4.2.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "typescript": "^5.8.3"

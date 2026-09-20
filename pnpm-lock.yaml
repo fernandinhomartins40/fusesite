@@ -31,10 +31,16 @@ importers:
         version: 3.2.7(@types/node@22.20.4)(tsx@4.23.15)
 
   apps/fuse-criativos/web:
-    dependencies:
+    devDependencies:
       '@modelcontextprotocol/ext-apps':
         specifier: ^2.0.0
         version: 2.0.0(@modelcontextprotocol/client@2.0.0)(@modelcontextprotocol/core@2.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(zod@4.6.5)
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.3.0(@types/react@19.3.0)
       '@vitejs/plugin-react':
         specifier: ^5.0.4
         version: 5.2.0(vite@7.3.6(@types/node@22.20.4)(tsx@4.23.15))
@@ -44,22 +50,15 @@ importers:
       react-dom:
         specifier: ^19.1.1
         version: 19.3.0(react@19.3.0)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
       vite:
         specifier: ^7.1.7
         version: 7.3.6(@types/node@22.20.4)(tsx@4.23.15)
       zod:
         specifier: ^4.2.0
         version: 4.6.5
-    devDependencies:
-      '@types/react':
-        specifier: ^19.1.10
-        version: 19.3.0
-      '@types/react-dom':
-        specifier: ^19.1.7
-        version: 19.3.0(@types/react@19.3.0)
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
 
 packages:
 

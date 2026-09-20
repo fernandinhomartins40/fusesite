@@ -5,4 +5,5 @@ coverage/
 .env.local
 playwright-report/
 test-results/
-
+.vps_command.py
+.audit_vps.py

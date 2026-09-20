@@ -13,8 +13,9 @@ export const OPEN_CREATIVE_STUDIO_METADATA = {
   "openai/toolInvocation/invoked": "Estúdio pronto.",
 } as const;
 
-const studioScriptPath = fileURLToPath(new URL("../../web/dist/studio.iife.js", import.meta.url));
-const studioStylePath = fileURLToPath(new URL("../../web/dist/studio.css", import.meta.url));
+const webDist = process.env.FUSE_WEB_DIST ?? fileURLToPath(new URL("../../web/dist", import.meta.url));
+const studioScriptPath = `${webDist}/studio.iife.js`;
+const studioStylePath = `${webDist}/studio.css`;
 
 export function readStudioHtml(): string {
   const script = readFileSync(studioScriptPath, "utf8");

@@ -1,0 +1,24 @@
+services:
+  fuse-criativos:
+    image: ${FUSE_IMAGE:?Defina a imagem GHCR a ser executada}
+    container_name: fuse-criativos
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3100"
+      PUBLIC_BASE_URL: https://mcp.fusesite.com.br
+      LOG_LEVEL: info
+    ports:
+      - "127.0.0.1:3100:3100"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: "0.50"
+        reservations:
+          memory: 128M
