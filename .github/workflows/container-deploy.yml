@@ -106,5 +106,13 @@ jobs:
             cd /opt/fuse-mcp-platform
             FUSE_IMAGE="$FUSE_IMAGE" docker compose -f compose.production.yaml pull
             FUSE_IMAGE="$FUSE_IMAGE" docker compose -f compose.production.yaml up -d --no-build --remove-orphans
-            curl --fail --silent --show-error http://127.0.0.1:3100/health
+            for attempt in $(seq 1 30); do
+              if curl --fail --silent --show-error http://127.0.0.1:3100/health; then
+                exit 0
+              fi
+              sleep 2
+            done
+            docker compose -f compose.production.yaml ps
+            docker compose -f compose.production.yaml logs --tail=100
+            exit 1
           REMOTE
